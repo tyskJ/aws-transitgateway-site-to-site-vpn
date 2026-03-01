@@ -44,7 +44,7 @@ resource "aws_nat_gateway" "name" {
   depends_on        = [aws_internet_gateway.this]
   availability_mode = "regional"
   connectivity_type = "public"
-  vpc_id            = aws_vpc.this["onpremises"]
+  vpc_id            = aws_vpc.this["onpremises"].id
   tags = {
     Name = "onpremises-regional-nat"
   }
