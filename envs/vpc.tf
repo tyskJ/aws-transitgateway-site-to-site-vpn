@@ -71,3 +71,22 @@ resource "aws_route_table_association" "this" {
   route_table_id = aws_route_table.this[each.key].id
   subnet_id      = aws_subnet.this[each.key].id
 }
+
+/************************************************************
+Route
+************************************************************/
+resource "aws_route" "onpremises_gateway_public_a_to_igw" {
+  route_table_id         = aws_route_table.this["onpremises_gateway_public_a"].id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.this.id
+}
+resource "aws_route" "onpremises_gateway_public_c_to_igw" {
+  route_table_id         = aws_route_table.this["onpremises_gateway_public_c"].id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.this.id
+}
+resource "aws_route" "aws_client_private_a_to_tgw" {
+  route_table_id         = aws_route_table.this["aws_client_private_a"].id
+  destination_cidr_block = "0.0.0.0/0"
+  transit_gateway_id     = aws_ec2_transit_gateway.this.id
+}
