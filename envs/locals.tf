@@ -132,3 +132,20 @@ locals {
     }
   }
 }
+
+/************************************************************
+EC2
+************************************************************/
+locals {
+  instanceprofiles = {
+    onpremises_client_ec2 = {
+      name = "onpremises-client-ec2"
+    }
+    onpremises_gateway_ec2_a = {
+      name = "onpremises-gateway-ec2-a"
+    }
+    onpremises_gateway_ec2_c = {
+      name = "onpremises-gateway-ec2-c"
+    }
+  }
+}

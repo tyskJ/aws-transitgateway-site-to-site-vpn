@@ -19,3 +19,13 @@ resource "aws_key_pair" "keypair" {
     Name = "common-keypair"
   }
 }
+
+/************************************************************
+Instance Profile
+************************************************************/
+resource "aws_iam_instance_profile" "this" {
+  for_each = local.instanceprofiles
+
+  name = each.value.name
+  role = aws_iam_role.ec2_role.name
+}
