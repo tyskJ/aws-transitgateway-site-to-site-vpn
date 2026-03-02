@@ -99,3 +99,50 @@ resource "aws_instance" "aws_client" {
     Name = "aws-client"
   }
 }
+
+/************************************************************
+EC2 - Gateway
+************************************************************/
+resource "aws_instance" "this" {
+  for_each = local.instances
+
+  ami           = data.aws_ssm_parameter.amazonlinux_2023.value
+  key_name      = aws_key_pair.keypair.id
+  instance_type = "c6i.large"
+  ebs_optimized = true
+  root_block_device {
+    volume_size           = 100
+    volume_type           = "gp3"
+    iops                  = 3000
+    throughput            = 125
+    delete_on_termination = true
+    encrypted             = true
+    tags = {
+      Name = "${each.value.name}-root-volume"
+    }
+  }
+  primary_network_interface {
+    network_interface_id = aws_network_interface.this[each.value.primary_eni_key].id
+  }
+  metadata_options {
+    http_tokens = "required"
+  }
+  maintenance_options {
+    auto_recovery = "default"
+  }
+  disable_api_stop        = false
+  disable_api_termination = false
+  force_destroy           = true
+  iam_instance_profile    = aws_iam_instance_profile.this[each.value.instanceprofile_key].name
+  tags = {
+    Name = each.value.name
+  }
+}
+
+resource "aws_network_interface_attachment" "this" {
+  for_each = local.instances
+
+  instance_id          = aws_instance.this[each.key].id
+  network_interface_id = aws_network_interface.this[each.value.secondary_eni_key].id
+  device_index         = 1
+}

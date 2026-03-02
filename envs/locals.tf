@@ -188,4 +188,18 @@ locals {
       domain = "vpc"
     }
   }
+  instances = {
+    onpremises_gateway_ec2_a = {
+      name                = "onpremises-gateway-a"
+      primary_eni_key     = "onpremises_gateway_ec2_a_primary"
+      secondary_eni_key   = "onpremises_gateway_ec2_a_secondary"
+      instanceprofile_key = "onpremises_gateway_ec2_a"
+    }
+    onpremises_gateway_ec2_c = {
+      name                = "onpremises-gateway-c"
+      primary_eni_key     = "onpremises_gateway_ec2_c_primary"
+      secondary_eni_key   = "onpremises_gateway_ec2_c_secondary"
+      instanceprofile_key = "onpremises_gateway_ec2_c"
+    }
+  }
 }
