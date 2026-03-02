@@ -61,3 +61,13 @@ resource "aws_route_table" "this" {
     Name = each.value.name
   }
 }
+
+/************************************************************
+RouteTable Association
+************************************************************/
+resource "aws_route_table_association" "this" {
+  for_each = local.rtbs
+
+  route_table_id = aws_route_table.this[each.key].id
+  subnet_id      = aws_subnet.this[each.key].id
+}
