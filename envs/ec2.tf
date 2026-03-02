@@ -36,12 +36,26 @@ Elastice Network Interface
 resource "aws_network_interface" "this" {
   for_each = local.enis
 
-  subnet_id      = aws_subnet.this[each.value.subnet_key].id
-  description    = each.value.description
+  subnet_id   = aws_subnet.this[each.value.subnet_key].id
+  description = each.value.description
   security_groups = [
     aws_security_group.this[each.value.sg_key].id
   ]
   source_dest_check = each.value.srcdst
+  tags = {
+    Name = each.value.name
+  }
+}
+
+/************************************************************
+Elastice IP
+************************************************************/
+resource "aws_eip" "this" {
+  for_each = local.eips
+  depends_on = [ aws_internet_gateway.this ]
+
+  domain            = each.value.domain
+  network_interface = aws_network_interface.this[each.key].id
   tags = {
     Name = each.value.name
   }
