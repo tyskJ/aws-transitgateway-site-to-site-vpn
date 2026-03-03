@@ -175,16 +175,16 @@ locals {
   }
   instances = {
     onpremises_gateway_ec2_a = {
-      name       = "onpremises-gateway-a"
-      subnet_key = "onpremises_gateway_public_a"
-      sg_key     = "onpremises_gateway_ec2_gip"
+      name                = "onpremises-gateway-a"
+      subnet_key          = "onpremises_gateway_public_a"
+      sg_key              = "onpremises_gateway_ec2_gip"
       secondary_eni_key   = "onpremises_gateway_ec2_a_secondary"
       instanceprofile_key = "onpremises_gateway_ec2_a"
     }
     onpremises_gateway_ec2_c = {
-      name       = "onpremises-gateway-c"
-      subnet_key = "onpremises_gateway_public_c"
-      sg_key     = "onpremises_gateway_ec2_gip"
+      name                = "onpremises-gateway-c"
+      subnet_key          = "onpremises_gateway_public_c"
+      sg_key              = "onpremises_gateway_ec2_gip"
       secondary_eni_key   = "onpremises_gateway_ec2_c_secondary"
       instanceprofile_key = "onpremises_gateway_ec2_c"
     }

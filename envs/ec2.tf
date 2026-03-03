@@ -95,7 +95,7 @@ resource "aws_eip" "this" {
   for_each   = local.eips
   depends_on = [aws_internet_gateway.this]
 
-  domain = each.value.domain
+  domain   = each.value.domain
   instance = aws_instance.this[each.value.instance_key].id
   tags = {
     Name = each.value.name
