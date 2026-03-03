@@ -62,45 +62,6 @@ resource "aws_eip" "this" {
 }
 
 /************************************************************
-EC2 - Client
-************************************************************/
-resource "aws_instance" "aws_client" {
-  ami                         = data.aws_ssm_parameter.amazonlinux_2023.value
-  associate_public_ip_address = false
-  key_name                    = aws_key_pair.keypair.id
-  instance_type               = "t3.large"
-  ebs_optimized               = true
-  root_block_device {
-    volume_size           = 50
-    volume_type           = "gp3"
-    iops                  = 3000
-    throughput            = 125
-    delete_on_termination = true
-    encrypted             = true
-    tags = {
-      Name = "aws-client-root-volume"
-    }
-  }
-  subnet_id = aws_subnet.this["aws_client_private_a"].id
-  vpc_security_group_ids = [
-    aws_security_group.this["aws_client_ec2"].id
-  ]
-  metadata_options {
-    http_tokens = "required"
-  }
-  maintenance_options {
-    auto_recovery = "default"
-  }
-  disable_api_stop        = false
-  disable_api_termination = false
-  force_destroy           = true
-  iam_instance_profile    = aws_iam_instance_profile.this["aws_client_ec2"].name
-  tags = {
-    Name = "aws-client"
-  }
-}
-
-/************************************************************
 EC2 - Gateway
 ************************************************************/
 resource "aws_instance" "this" {

@@ -110,10 +110,10 @@ Security Group
 ************************************************************/
 locals {
   sgs = {
-    aws_client_ec2 = {
+    aws_cloudshell = {
       vpc_key     = "aws"
-      name        = "aws-client-ec2-sg"
-      description = "For AWS VPC Client EC2"
+      name        = "aws-cloudshell-sg"
+      description = "For AWS VPC Client CloudShell"
     }
     onpremises_gateway_ec2_gip = {
       vpc_key     = "onpremises"
@@ -138,9 +138,6 @@ EC2
 ************************************************************/
 locals {
   instanceprofiles = {
-    aws_client_ec2 = {
-      name = "aws-client-ec2"
-    }
     onpremises_gateway_ec2_a = {
       name = "onpremises-gateway-ec2-a"
     }

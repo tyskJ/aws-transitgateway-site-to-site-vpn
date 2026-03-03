@@ -105,14 +105,23 @@ resource "aws_security_group" "this" {
 /************************************************************
 Security Group Rule
 ************************************************************/
-resource "aws_security_group_rule" "aws_client_ec2_ingress_all" {
+resource "aws_security_group_rule" "aws_cloudshell_ingress_all" {
   type              = "ingress"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = [local.vpcs.onpremises.cidr]
-  security_group_id = aws_security_group.this["aws_client_ec2"].id
-  description       = "From Onpremises Clinet EC2 Traffic"
+  security_group_id = aws_security_group.this["aws_cloudshell"].id
+  description       = "From Onpremises Clinet Traffic"
+}
+resource "aws_security_group_rule" "aws_cloudshell_egress_all" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.this["aws_cloudshell"].id
+  description       = "To Unrestricted Traffice"
 }
 resource "aws_security_group_rule" "onpremises_gateway_ec2_gip_egress_all" {
   type              = "egress"
@@ -131,6 +140,15 @@ resource "aws_security_group_rule" "onpremises_gateway_ec2_pip_ingress_private" 
   cidr_blocks       = [local.vpcs.onpremises.cidr]
   security_group_id = aws_security_group.this["onpremises_gateway_ec2_pip"].id
   description       = "From Onpremises Private NW Traffic"
+}
+resource "aws_security_group_rule" "onpremises_cloudshell_ingress_all" {
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = [local.vpcs.aws.cidr]
+  security_group_id = aws_security_group.this["onpremises_cloudshell"].id
+  description       = "From AWS Client Traffice"
 }
 resource "aws_security_group_rule" "onpremises_cloudshell_egress_all" {
   type              = "egress"
