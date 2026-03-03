@@ -48,20 +48,6 @@ resource "aws_network_interface" "this" {
 }
 
 /************************************************************
-Elastice IP
-************************************************************/
-resource "aws_eip" "this" {
-  for_each   = local.eips
-  depends_on = [aws_internet_gateway.this]
-
-  domain            = each.value.domain
-  network_interface = aws_network_interface.this[each.key].id
-  tags = {
-    Name = each.value.name
-  }
-}
-
-/************************************************************
 EC2 - Gateway
 ************************************************************/
 resource "aws_instance" "this" {
@@ -70,6 +56,10 @@ resource "aws_instance" "this" {
   ami           = data.aws_ssm_parameter.amazonlinux_2023.value
   key_name      = aws_key_pair.keypair.id
   instance_type = "c6i.large"
+  subnet_id     = aws_subnet.this[each.value.subnet_key].id
+  vpc_security_group_ids = [
+    aws_security_group.this[each.value.sg_key].id
+  ]
   ebs_optimized = true
   root_block_device {
     volume_size           = 100
@@ -82,9 +72,6 @@ resource "aws_instance" "this" {
       Name = "${each.value.name}-root-volume"
     }
   }
-  primary_network_interface {
-    network_interface_id = aws_network_interface.this[each.value.primary_eni_key].id
-  }
   metadata_options {
     http_tokens = "required"
   }
@@ -95,13 +82,32 @@ resource "aws_instance" "this" {
   disable_api_termination = false
   force_destroy           = true
   iam_instance_profile    = aws_iam_instance_profile.this[each.value.instanceprofile_key].name
+  source_dest_check       = false
   tags = {
     Name = each.value.name
   }
 }
 
+/************************************************************
+Elastice IP
+************************************************************/
+resource "aws_eip" "this" {
+  for_each   = local.eips
+  depends_on = [aws_internet_gateway.this]
+
+  domain = each.value.domain
+  instance = aws_instance.this[each.value.instance_key].id
+  tags = {
+    Name = each.value.name
+  }
+}
+
+/************************************************************
+Secondary ENI
+************************************************************/
 resource "aws_network_interface_attachment" "this" {
-  for_each = local.instances
+  for_each   = local.instances
+  depends_on = [aws_eip.this]
 
   instance_id          = aws_instance.this[each.key].id
   network_interface_id = aws_network_interface.this[each.value.secondary_eni_key].id
