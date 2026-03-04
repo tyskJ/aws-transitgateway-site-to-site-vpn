@@ -47,6 +47,7 @@ EOF
 ### sysctl -p は /etc/sysctl.conf のみ反映される
 sysctl --system
 
-# Strongswan install
-apt install strongswan strongswan-swanctl -y
-systemctl enable --now ipsec
+# Strongswan install (strongswan-swanctlもインストールされる)
+apt install charon-systemd -y
+### strongswan-charon strongswan-starter 自動削除
+apt autoremove -y
