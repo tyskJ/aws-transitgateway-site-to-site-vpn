@@ -121,7 +121,25 @@ resource "aws_security_group_rule" "aws_cloudshell_egress_all" {
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.this["aws_cloudshell"].id
-  description       = "To Unrestricted Traffice"
+  description       = "To Unrestricted Traffic"
+}
+resource "aws_security_group_rule" "onpremises_gateway_ec2_gip_ingress_ike" {
+  type              = "ingress"
+  from_port         = 500
+  to_port           = 500
+  protocol          = "17"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.this["onpremises_gateway_ec2_gip"].id
+  description       = "From TGW IKE Traffic"
+}
+resource "aws_security_group_rule" "onpremises_gateway_ec2_gip_ingress_nattraversal" {
+  type              = "ingress"
+  from_port         = 4500
+  to_port           = 4500
+  protocol          = "17"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.this["onpremises_gateway_ec2_gip"].id
+  description       = "From TGW NAT Traversal Traffic"
 }
 resource "aws_security_group_rule" "onpremises_gateway_ec2_gip_egress_all" {
   type              = "egress"
@@ -148,7 +166,7 @@ resource "aws_security_group_rule" "onpremises_cloudshell_ingress_all" {
   protocol          = "-1"
   cidr_blocks       = [local.vpcs.aws.cidr]
   security_group_id = aws_security_group.this["onpremises_cloudshell"].id
-  description       = "From AWS Client Traffice"
+  description       = "From AWS Client Traffic"
 }
 resource "aws_security_group_rule" "onpremises_cloudshell_egress_all" {
   type              = "egress"
@@ -157,5 +175,5 @@ resource "aws_security_group_rule" "onpremises_cloudshell_egress_all" {
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.this["onpremises_cloudshell"].id
-  description       = "To Unrestricted Traffice"
+  description       = "To Unrestricted Traffic"
 }
