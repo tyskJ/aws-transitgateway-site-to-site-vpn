@@ -53,7 +53,7 @@ EC2 - Gateway
 resource "aws_instance" "this" {
   for_each = local.instances
 
-  ami           = data.aws_ssm_parameter.amazonlinux_2023.value
+  ami           = data.aws_ami_ids.ubuntu.ids[0]
   key_name      = aws_key_pair.keypair.id
   instance_type = "c6i.large"
   subnet_id     = aws_subnet.this[each.value.subnet_key].id

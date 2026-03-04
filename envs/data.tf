@@ -4,6 +4,11 @@ data "aws_region" "current" {}
 
 data "aws_partition" "current" {}
 
-data "aws_ssm_parameter" "amazonlinux_2023" {
-  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64"
+data "aws_ami_ids" "ubuntu" {
+  owners = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-*-24.04-amd64-server-*"]
+  }
+  sort_ascending = false # 降順（日次が最新のものから）
 }
