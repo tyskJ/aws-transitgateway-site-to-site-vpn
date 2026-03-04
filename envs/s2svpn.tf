@@ -94,3 +94,21 @@ resource "aws_vpn_connection" "this" {
     Name = each.value.name
   }
 }
+
+/************************************************************
+S2S VPN Connections PSK
+************************************************************/
+resource "local_sensitive_file" "tunnel1" {
+  for_each = local.vpncons
+
+  filename        = "${path.module}/.key/${each.key}_tunnel1_psk.txt"
+  content         = aws_vpn_connection.this[each.key].tunnel1_preshared_key
+  file_permission = "0600"
+}
+resource "local_sensitive_file" "tunnel2" {
+  for_each = local.vpncons
+
+  filename        = "${path.module}/.key/${each.key}_tunnel2_psk.txt"
+  content         = aws_vpn_connection.this[each.key].tunnel2_preshared_key
+  file_permission = "0600"
+}
