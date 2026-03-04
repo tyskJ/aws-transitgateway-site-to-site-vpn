@@ -19,17 +19,17 @@ S2S VPN Connections
 resource "aws_vpn_connection" "this" {
   for_each = local.vpncons
   ### Base
-  type                                    = "ipsec.1"
-  transit_gateway_id                      = aws_ec2_transit_gateway.this.id
-  customer_gateway_id                     = aws_customer_gateway.this[each.key].id
-  static_routes_only                      = false
-  preshared_key_storage                   = "Standard"
-  tunnel_bandwidth                        = "standard"
-  tunnel_inside_ip_version                = "ipv4"
-  enable_acceleration                     = false
-  local_ipv4_network_cidr                 = "0.0.0.0/0"
-  remote_ipv4_network_cidr                = "0.0.0.0/0"
-  outside_ip_address_type                 = "PublicIpv4"
+  type                     = "ipsec.1"
+  transit_gateway_id       = aws_ec2_transit_gateway.this.id
+  customer_gateway_id      = aws_customer_gateway.this[each.key].id
+  static_routes_only       = false
+  preshared_key_storage    = "Standard"
+  tunnel_bandwidth         = "standard"
+  tunnel_inside_ip_version = "ipv4"
+  enable_acceleration      = false
+  local_ipv4_network_cidr  = "0.0.0.0/0"
+  remote_ipv4_network_cidr = "0.0.0.0/0"
+  outside_ip_address_type  = "PublicIpv4"
   # ### Tunnel 1
   # tunnel1_inside_cidr                     = "169.254.208.48/30"
   # tunnel1_preshared_key                   = null # sensitive
