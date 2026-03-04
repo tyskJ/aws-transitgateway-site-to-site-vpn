@@ -47,6 +47,12 @@ resource "aws_ec2_transit_gateway_route_table" "vpc" {
     Name = "tgw-rtb-for-vpc"
   }
 }
+resource "aws_ec2_transit_gateway_route_table" "vpn" {
+  transit_gateway_id = aws_ec2_transit_gateway.this.id
+  tags = {
+    Name = "tgw-rtb-for-vpn"
+  }
+}
 
 /************************************************************
 Transit Gateway RouteTable Association
@@ -54,4 +60,10 @@ Transit Gateway RouteTable Association
 resource "aws_ec2_transit_gateway_route_table_association" "vpc" {
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.vpc.id
+}
+resource "aws_ec2_transit_gateway_route_table_association" "vpn_connection" {
+  for_each = local.vpncons
+
+  transit_gateway_attachment_id  = aws_vpn_connection.this[each.key].transit_gateway_attachment_id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.vpn.id
 }
