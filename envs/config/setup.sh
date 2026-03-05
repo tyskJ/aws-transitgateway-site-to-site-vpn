@@ -109,6 +109,9 @@ apt install frr -y
 sed -i 's/^bgpd=no/bgpd=yes/' /etc/frr/daemons
 systemctl enable --now frr
 
+cat <<EOF > /etc/frr/frr.conf
+EOF
+
 ########################################
 # Strongswan settings
 ########################################
