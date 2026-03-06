@@ -1,7 +1,7 @@
 .. image:: ./doc/001samune.png
 
 =====================================================================
-AWS Transit Gateway + AWS Site-to-Site VPN
+AWS Transit Gateway + AWS Site-to-Site VPN - Multi
 =====================================================================
 * `詳細 <>`_
 
@@ -81,34 +81,19 @@ AWS Transit Gateway + AWS Site-to-Site VPN
 
   * *事前作業(2)* で作成したバケット名に合わせること
 
-2. 変数ファイル作成
----------------------------------------------------------------------
-
-.. note::
-
-  * *envs* フォルダ配下に作成すること
-
-.. code-block:: bash
-    
-    cat <<EOF > aws.auto.tfvars
-    source_ip = ["アクセス元IPアドレス(CIDR形式)"]
-    domain_name = "ドメイン名"
-    public_hostedzone_id = "Route 53パブリックホストゾーンID"
-    EOF
-
-3. *Terraform* 初期化
+2. *Terraform* 初期化
 ---------------------------------------------------------------------
 .. code-block:: bash
     
     terraform init -backend-config="./config.aws.tfbackend"
 
-4. 事前確認
+3. 事前確認
 ---------------------------------------------------------------------
 .. code-block:: bash
 
     terraform plan
 
-5. デプロイ
+4. デプロイ
 ---------------------------------------------------------------------
 .. code-block:: bash
 
