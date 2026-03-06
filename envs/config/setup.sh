@@ -133,3 +133,63 @@ charon {
 
 }
 EOF
+
+########################################
+# Router Routing
+########################################
+### テーブル作成
+echo "100 tgw" >> /etc/iproute2/rt_tables
+### ens6 network
+cat <<EOF > /etc/systemd/network/20-ens6.network
+[Match]
+Name=ens6
+
+[Network]
+DHCP=yes
+IPForward=yes
+
+# DHCP で ens6 への default route を入れさせない（Internetはens5）
+[DHCP]
+UseRoutes=false
+
+# ----------------------------
+# 背後ネットワーク（複数OK）
+# ----------------------------
+[Route]
+Destination=192.168.1.0/24
+
+# 例：将来増えてもここに足すだけ
+# [Route]
+# Destination=192.168.2.0/24
+# [Route]
+# Destination=192.168.3.0/24
+
+# ----------------------------
+# src-based PBR（Routing Policy）
+# ----------------------------
+[RoutingPolicyRule]
+From=192.168.1.0/24
+To=172.16.0.0/16
+Table=100
+Priority=100
+EOF
+### 反映
+networkctl reload
+### tgwテーブルルートルールサービス化
+cat <<EOF > /etc/systemd/system/tgw-ecmp.service
+[Unit]
+Description=TGW ECMP Routing
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ip route replace table 100 172.16.0.0/16 \
+    nexthop dev xfrm101 weight 1 \
+    nexthop dev xfrm102 weight 1
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable --now tgw-ecmp.service
