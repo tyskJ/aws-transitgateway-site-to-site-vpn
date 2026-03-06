@@ -72,7 +72,7 @@ AWS Transit Gateway + AWS Site-to-Site VPN - Multi
     
     cat <<EOF > config.aws.tfbackend
     bucket = "terraform-working"
-    key = "aws-transitgateway-site-to-site-vpn/terraform.tfstate"
+    key = "aws-transitgateway-site-to-site-vpn-multi/terraform.tfstate"
     region = "ap-northeast-1"
     profile = "admin"
     EOF
