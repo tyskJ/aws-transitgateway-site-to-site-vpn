@@ -42,9 +42,9 @@ UseRoutes=false
 [Route]
 # EC2背後に存在するプライベートネットワーク
 # ens6経由で到達可能なネットワークとして登録
-# Gatewayにてサブネット内の VPC Router IP を指定する
+# Gatewayにて自身が所属するサブネット内の VPC Router IP を指定する
 Destination=${onpremises_client_private_a_subnet_cidr}
-Gateway=${onpremises_gateway_private_a_subnet_vpc_router_ip}
+Gateway=${onpremises_gateway_private_subnet_vpc_router_ip}
 
 # ネットワークが増えた場合はここに追加
 # [Route]
