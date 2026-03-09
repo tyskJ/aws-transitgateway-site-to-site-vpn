@@ -54,6 +54,13 @@ locals {
       cidr       = "192.168.254.240/28"
       map_public = false
     }
+    onpremises_gateway_public_c = {
+      vpc_key    = "onpremises"
+      name       = "onpremises-gateway-public-subnet-c"
+      az         = "a"
+      cidr       = "192.168.255.240/28"
+      map_public = false
+    }
   }
 }
 
@@ -90,6 +97,9 @@ locals {
       rtb_key = "onpremises_client_private"
     }
     onpremises_gateway_public_a = {
+      rtb_key = "onpremises_gateway_public"
+    }
+    onpremises_gateway_public_c = {
       rtb_key = "onpremises_gateway_public"
     }
   }
@@ -131,12 +141,22 @@ locals {
     onpremises_gateway_ec2_a = {
       name = "onpremises-gateway-ec2-a"
     }
+    onpremises_gateway_ec2_c = {
+      name = "onpremises-gateway-ec2-c"
+    }
   }
   enis = {
     onpremises_gateway_ec2_a_secondary = {
       name        = "onpremises-gateway-a-secondary-eni"
       description = "gateway a secondary eni"
       subnet_key  = "onpremises_gateway_public_a"
+      srcdst      = false
+      sg_key      = "onpremises_gateway_ec2_pip"
+    }
+    onpremises_gateway_ec2_c_secondary = {
+      name        = "onpremises-gateway-c-secondary-eni"
+      description = "gateway c secondary eni"
+      subnet_key  = "onpremises_gateway_public_c"
       srcdst      = false
       sg_key      = "onpremises_gateway_ec2_pip"
     }
@@ -147,6 +167,11 @@ locals {
       domain       = "vpc"
       instance_key = "onpremises_gateway_ec2_a"
     }
+    onpremises_gateway_ec2_c = {
+      name         = "onpremises-gateway-ec2-c-primary-eni-eip"
+      domain       = "vpc"
+      instance_key = "onpremises_gateway_ec2_c"
+    }
   }
   instances = {
     onpremises_gateway_ec2_a = {
@@ -155,6 +180,13 @@ locals {
       sg_key              = "onpremises_gateway_ec2_gip"
       secondary_eni_key   = "onpremises_gateway_ec2_a_secondary"
       instanceprofile_key = "onpremises_gateway_ec2_a"
+    }
+    onpremises_gateway_ec2_c = {
+      name                = "onpremises-gateway-c"
+      subnet_key          = "onpremises_gateway_public_c"
+      sg_key              = "onpremises_gateway_ec2_gip"
+      secondary_eni_key   = "onpremises_gateway_ec2_c_secondary"
+      instanceprofile_key = "onpremises_gateway_ec2_c"
     }
   }
 }
@@ -180,6 +212,22 @@ locals {
       name          = "/aws/connections/gateway/a/tunnel2/bgp"
       retention_day = 7
     }
+    onpremises_gateway_ec2_c_tunnel1_vpn = {
+      name          = "/aws/connections/gateway/c/tunnel1/vpn"
+      retention_day = 7
+    }
+    onpremises_gateway_ec2_c_tunnel1_bgp = {
+      name          = "/aws/connections/gateway/c/tunnel1/bgp"
+      retention_day = 7
+    }
+    onpremises_gateway_ec2_c_tunnel2_vpn = {
+      name          = "/aws/connections/gateway/c/tunnel2/vpn"
+      retention_day = 7
+    }
+    onpremises_gateway_ec2_c_tunnel2_bgp = {
+      name          = "/aws/connections/gateway/c/tunnel2/bgp"
+      retention_day = 7
+    }
   }
 }
 
@@ -193,6 +241,11 @@ locals {
       asn     = 65000
       eip_key = "onpremises_gateway_ec2_a"
     }
+    onpremises_gateway_ec2_c = {
+      name    = "cgw-onpremises-gateway-ec2-c"
+      asn     = 65000
+      eip_key = "onpremises_gateway_ec2_c"
+    }
   }
   vpncons = {
     onpremises_gateway_ec2_a = {
@@ -201,6 +254,13 @@ locals {
       logs_tunnel1_vpn_key = "onpremises_gateway_ec2_a_tunnel1_vpn"
       logs_tunnel2_bgp_key = "onpremises_gateway_ec2_a_tunnel2_bgp"
       logs_tunnel2_vpn_key = "onpremises_gateway_ec2_a_tunnel2_vpn"
+    }
+    onpremises_gateway_ec2_c = {
+      name                 = "connections-onpremises-gateway-ec2-c"
+      logs_tunnel1_bgp_key = "onpremises_gateway_ec2_c_tunnel1_bgp"
+      logs_tunnel1_vpn_key = "onpremises_gateway_ec2_c_tunnel1_vpn"
+      logs_tunnel2_bgp_key = "onpremises_gateway_ec2_c_tunnel2_bgp"
+      logs_tunnel2_vpn_key = "onpremises_gateway_ec2_c_tunnel2_vpn"
     }
   }
 }
