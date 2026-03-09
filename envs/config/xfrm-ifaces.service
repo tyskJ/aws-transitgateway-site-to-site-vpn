@@ -1,0 +1,29 @@
+[Unit]
+Description=Create XFRM interfaces for IPsec (idempotent)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# ---- 既存があれば消す（無ければ何もしない）----
+ExecStartPre=/bin/sh -c 'ip link show xfrm101 >/dev/null 2>&1 && ip link del xfrm101 || true'
+ExecStartPre=/bin/sh -c 'ip link show xfrm102 >/dev/null 2>&1 && ip link del xfrm102 || true'
+
+# ---- xfrm101（if_id=101）----
+ExecStart=/usr/sbin/ip link add xfrm101 type xfrm if_id 101
+ExecStart=/usr/sbin/ip addr add ${cgwside_tunnel1_insideip}/30 dev xfrm101
+ExecStart=/usr/sbin/ip link set xfrm101 up
+
+# ---- xfrm102（if_id=102） ----
+ExecStart=/usr/sbin/ip link add xfrm102 type xfrm if_id 102
+ExecStart=/usr/sbin/ip addr add ${cgwside_tunnel2_insideip}/30 dev xfrm102
+ExecStart=/usr/sbin/ip link set xfrm102 up
+
+# ---- 停止時に削除（無くてもOK）----
+ExecStop=/bin/sh -c 'ip link show xfrm101 >/dev/null 2>&1 && ip link del xfrm101 || true'
+ExecStop=/bin/sh -c 'ip link show xfrm102 >/dev/null 2>&1 && ip link del xfrm102 || true'
+
+[Install]
+WantedBy=multi-user.target

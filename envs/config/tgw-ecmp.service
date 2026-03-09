@@ -1,0 +1,14 @@
+[Unit]
+Description=TGW ECMP Routing
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ip route replace table 100 ${aws_vpc_cidr} \
+    nexthop dev xfrm101 weight 1 \
+    nexthop dev xfrm102 weight 1
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

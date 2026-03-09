@@ -1,0 +1,23 @@
+[Unit]
+Description=SNAT via ens5 using ipset (persisted by ipset restore)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# 1) ipset を定義ファイルから復元（存在しても上書き/追加できる）
+ExecStart=/bin/sh -c '/usr/sbin/ipset restore -exist < /etc/ipset/snat_sources.conf'
+
+# 2) iptables NAT ルール（1本だけ）を冪等に投入
+#    - 既にあれば何もしない / 無ければ追加
+#    - ExecStart=/bin/sh -c '... || ...' にしているのは、systemd の ExecStart は「失敗するとユニット全体が失敗扱い」になるため
+ExecStart=/bin/sh -c '/usr/sbin/iptables -t nat -C POSTROUTING -m set --match-set snat_sources src -o ens5 -j MASQUERADE 2>/dev/null || /usr/sbin/iptables -t nat -A POSTROUTING -m set --match-set snat_sources src -o ens5 -j MASQUERADE'
+
+# 停止時はルールを消して ipset も破棄（無くても失敗しないようにする）
+ExecStop=/bin/sh -c '/usr/sbin/iptables -t nat -D POSTROUTING -m set --match-set snat_sources src -o ens5 -j MASQUERADE 2>/dev/null || true'
+ExecStop=/bin/sh -c '/usr/sbin/ipset destroy snat_sources 2>/dev/null || true'
+
+[Install]
+WantedBy=multi-user.target

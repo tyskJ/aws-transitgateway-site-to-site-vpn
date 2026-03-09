@@ -1,0 +1,72 @@
+# ------------------------------------------------------------
+# ens6 : EC2背後のプライベートネットワーク用インターフェース
+#
+# このEC2はVPNルーターとして動作する。
+#
+# インターフェース構成
+#   ens5 : 外向きIF（GIP保持 / Internet / VPN通信）
+#   xfrm : IPsec VPNトンネルインターフェース
+#   ens6 : 背後プライベートNWのゲートウェイ
+#
+# 背後NW(192.168.x.x)の通信をVPN経由でAWSネットワーク
+# (172.16.x.x)へ転送するためのルーティング設定。
+# ------------------------------------------------------------
+
+[Match]
+# この設定を適用するインターフェース
+# EC2にセカンダリENIとしてアタッチされたNIC
+Name=ens6
+
+[Network]
+# IPアドレスはVPCのDHCPから取得
+DHCP=yes
+
+# EC2をルーターとして動作させるためIPフォワーディングを有効化
+# 背後NW → VPN / AWS への通信を転送するため
+IPForward=yes
+
+
+# ----------------------------
+# DHCP設定
+# ----------------------------
+[DHCP]
+# DHCPから配布されるdefault routeを使用しない
+# インターネット/VPNの経路はens5側のルートを使用するため
+UseRoutes=false
+
+
+# ----------------------------
+# 背後ネットワークの定義
+# ----------------------------
+
+[Route]
+# EC2背後に存在するプライベートネットワーク
+# ens6経由で到達可能なネットワークとして登録
+# Gatewayにてサブネット内の VPC Router IP を指定する
+Destination=${onpremises_client_private_a_subnet_cidr}
+Gateway=${onpremises_gateway_private_a_subnet_vpc_router_ip}
+
+# ネットワークが増えた場合はここに追加
+# [Route]
+# Destination=192.168.2.0/24
+# [Route]
+# Destination=192.168.3.0/24
+
+
+# ----------------------------
+# Policy Based Routing (PBR)
+# ----------------------------
+
+[RoutingPolicyRule]
+# 背後NWから送信される通信を対象
+From=${onpremises_client_private_a_subnet_cidr}
+
+# 対向ネットワーク宛の通信
+To=${aws_vpc_cidr}
+
+# VPN用のルーティングテーブルを使用
+# このテーブルでxfrmインターフェース経由のルートを定義
+Table=100
+
+# ルール評価優先度（小さいほど優先）
+Priority=100
