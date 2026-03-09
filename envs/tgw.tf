@@ -75,6 +75,10 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "vpc_connections_a" {
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.vpc.id
   transit_gateway_attachment_id  = aws_vpn_connection.this["onpremises_gateway_ec2_a"].transit_gateway_attachment_id
 }
+resource "aws_ec2_transit_gateway_route_table_propagation" "vpc_connections_c" {
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.vpc.id
+  transit_gateway_attachment_id  = aws_vpn_connection.this["onpremises_gateway_ec2_c"].transit_gateway_attachment_id
+}
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "vpn" {
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.vpn.id
