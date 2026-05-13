@@ -18,7 +18,7 @@ AWS Transit Gateway + AWS Site-to-Site VPN - Multi
 * macOS Tahoe ( v26.3 )
 * Visual Studio Code 1.109.5
 * Terraform v1.14.5
-* aws-cli/2.32.10 Python/3.13.9 Darwin/25.2.0 exe/arm64
+* aws-cli/2.34.45 Python/3.14.4 Darwin/25.4.0 exe/arm64
 
 フォルダ構成
 =====================================================================
@@ -35,10 +35,47 @@ AWS Transit Gateway + AWS Site-to-Site VPN - Multi
     aws login --profile admin
 
 .. code-block:: bash
-    
-    sed -i '' '/^\[profile admin\]/a\
-    credential_process = aws configure export-credentials --profile admin
-    ' ~/.aws/config
+
+  CONFIG="$HOME/.aws/config"
+  
+  PROFILES=(
+    admin
+  )
+  
+  for PROFILE in "${PROFILES[@]}"; do
+    LINE="credential_process = aws configure export-credentials --profile ${PROFILE}"
+  
+    awk -v profile="$PROFILE" -v line="$LINE" '
+    BEGIN {
+      in_profile = 0
+      found = 0
+    }
+  
+    /^\[profile[[:space:]]+/ {
+      # 対象 profile を抜ける直前に、未追加なら挿入
+      if (in_profile && !found) {
+        print line
+      }
+      in_profile = ($0 == "[profile " profile "]")
+      found = 0
+    }
+  
+    {
+      if (in_profile && $0 ~ /^[[:space:]]*credential_process[[:space:]]*=/) {
+        found = 1
+      }
+      print
+    }
+  
+    END {
+      # ファイル末尾が対象 profile の場合
+      if (in_profile && !found) {
+        print line
+      }
+    }
+    ' "$CONFIG" > "$CONFIG.tmp" && command mv -f "$CONFIG.tmp" "$CONFIG"
+  
+  done
 
 事前作業(1)
 =====================================================================
@@ -50,13 +87,27 @@ AWS Transit Gateway + AWS Site-to-Site VPN - Multi
 =====================================================================
 1. *tfstate* 用S3バケット作成
 ---------------------------------------------------------------------
-.. code-block:: bash
-    
-    aws s3 mb s3://terraform-working --profile admin
 
 .. note::
 
   * バケット名は全世界で一意である必要があるため、作成に失敗した場合は任意の名前に変更
+
+.. code-block:: bash
+
+  PROFILE="admin"
+  ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text --profile ${PROFILE})
+  REGION="ap-northeast-1"
+  BUCKET_PREFIX="tfstate"
+  BUCKET_NAME="${BUCKET_PREFIX}-${ACCOUNT_ID}-${REGION}-an"
+
+.. code-block:: bash
+  
+  aws s3api create-bucket \
+  --bucket "${BUCKET_NAME}" \
+  --bucket-namespace account-regional \
+  --region "${REGION}" \
+  --create-bucket-configuration LocationConstraint="${REGION}" \
+  --profile "${PROFILE}"
 
 実作業 - ローカル -
 =====================================================================
@@ -68,17 +119,17 @@ AWS Transit Gateway + AWS Site-to-Site VPN - Multi
   * *envs* フォルダ配下に作成すること
 
 .. code-block:: bash
+
+  SYSTEM="aws-transitgateway-site-to-site-vpn-multi"
+
+.. code-block:: bash
     
-    cat <<EOF > config.aws.tfbackend
-    bucket = "terraform-working"
-    key = "aws-transitgateway-site-to-site-vpn-multi/terraform.tfstate"
-    region = "ap-northeast-1"
-    profile = "admin"
-    EOF
-
-.. note::
-
-  * *事前作業(2)* で作成したバケット名に合わせること
+  cat <<EOF > config.aws.tfbackend
+  bucket = "${BUCKET_NAME}"
+  key = "${SYSTEM}/terraform.tfstate"
+  region = "${REGION}"
+  profile = "${PROFILE}"
+  EOF
 
 2. *Terraform* 初期化
 ---------------------------------------------------------------------
@@ -110,12 +161,8 @@ AWS Transit Gateway + AWS Site-to-Site VPN - Multi
 ---------------------------------------------------------------------
 .. code-block:: bash
 
-    aws s3 rm s3://terraform-working --recursive --profile admin
-    aws s3 rb s3://terraform-working --profile admin
-
-.. note::
-
-  * *事前作業(2)* で作成したバケット名に合わせること
+  aws s3 rm s3://${BUCKET_NAME} --recursive --profile ${PROFILE}
+  aws s3 rb s3://${BUCKET_NAME} --profile ${PROFILE}
 
 参考資料
 =====================================================================
